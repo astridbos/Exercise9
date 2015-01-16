@@ -23,12 +23,25 @@ rm gewata.zip
 echo -e '\033[1m...Create and calculate NDVI file\033[0m'
 cp LE71700552001036SGS00_SR_Gewata_INT1U.tif input.tif
 gdal_calc.py -A input.tif --A_band=4 -B input.tif --B_band=3  --outfile=ndvi.tif  --calc="(A.astype(float)-B)/(A.astype(float)+B)" --type='Float32' --co="COMPRESS=LZW"
-echo -e '\033[1m...remove the input temporary file, PLEASE CONFIRM WITH "Y"\033[0m'
+echo -e '\033[1m...remove the input temporary file\033[0m'
 rm input.tif
 
 ## resampels the NDVI tif file to pixels of 60 m
+cd data
+cp ndvi.tif resamp.tif
+gdalwarp -tr 60 60 -r cubic resamp.tif resamp60.tif
+rm resamp.tif
+echo -e '\033[1m...NDVI file has been resampled to a pixel size of 60m, temporary file has been removed\033[0m'
+
 
 ## reprojects this resampled file to Lat/long WGS84 (the projection code is: EPSG:4326)
-      ##solution!!!: gdalwarp -t_srs EPSG:4326 $fntemp $fnout
-      
+cd data
+gdalwarp -t_srs EPSG:4326 resamp60.tif resamp60_rprj.tif
+echo -e '\033[1m...NDVI file has been reprojected to LatLong WGS84\033[0m'
+
+
 ## Optional: - convert the .tif file (i.e. a geotif) to .png
+convert resamp60_rprj.tif NDVI_60_latlong.png
+echo -e '\033[1m...NDVI file has been converted to a .png file\033[0m'
+echo '
+      END OF SCRIPT'
